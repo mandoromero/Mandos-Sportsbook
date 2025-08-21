@@ -1,0 +1,35 @@
+
+.log-in-container {
+    border: 5px #737373 ridged;
+    border-radius: 10px;
+    width: 50vw;
+    height: 60vh;
+    margin: 100px auto;
+    background-color: #737373;
+    color: white;
+}
+
+.sub-title {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 3rem;
+    font-weight: 800;
+}
+
+.log-in {
+    width: 60%;
+    height: 60%;
+    margin: 20px auto;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    margin: 60px 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+label {
+    margin-bottom: 10px;
+}

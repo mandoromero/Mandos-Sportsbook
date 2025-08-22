@@ -13,7 +13,8 @@ export default function LogIn() {
                     <label for="password-input">Password</label>
                     <input id="password-input" type="password" />
                 </div>
-                <button>Submit</button>
+                <a className="forgot-password">Forgot password</a>
+                <button className="login-btn">Submit</button>
             </div>
         </div>
     )

@@ -1,0 +1,49 @@
+.sign-up-form {
+    width: 50vw;
+    height: 100vh;
+    margin: 100px auto; 
+    background-color: #737373;
+    padding-top: 30px;
+    padding-bottom: 80px;
+    border-radius: 10px;
+    box-shadow: rgba(50,50,93,0.25) 0px 50px 100px -20px, rgba(0,0,0,0.3) 0px 30px 60px -30px;
+
+}
+
+.signup-form {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 30px auto;
+}
+
+.birth-date {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+}
+
+input {
+    width: 100%;
+}
+
+.month, .day, .year {
+    display: flex;
+    flex-direction: column;
+}
+
+
+#month, #day, #year {
+    width: 100%;
+}
+
+.submit-btn {
+    font-size: 1.5rem;
+    font-weight: 800;
+    padding: 10px 15px;
+    float: right;
+    margin-right: 233px;
+}

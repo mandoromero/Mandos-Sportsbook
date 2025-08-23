@@ -1,42 +1,59 @@
-import React, { useState } from "react";
+// components/Navbar.jsx
 import { Link } from "react-router-dom";
-import "../../components/Navbar/Navbar.css";
+import { useAuth } from"../AuthContext";
+import { auth } from "../../../firebase.js";
+import { signOut } from "firebase/auth";
+import { useState } from "react";
 
 export default function Navbar() {
-  const [searchNames, setSearchNames] = useState("");
+  const { user } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      console.log("User logged out");
+    } catch (error) {
+      console.error("Logout error:", error.message);
+    }
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
-    // for now, just log search
-    console.log("Searching for:", searchNames);
+    if (!user) {
+      alert("Please log in to use search!");
+      return;
+    }
+    console.log("Search for:", searchTerm);
+    // TODO: Add search logic / navigate to results page
   };
 
   return (
-    <nav className="navbar navbar-light bg-light px-3">
-      <div className="container d-flex justify-content-between align-items-center w-100">
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="d-flex">
-          <input
-            type="text"
-            className="form-control me-2"
-            placeholder="Search..."
-            value={searchNames}
-            onChange={(e) => setSearchNames(e.target.value)}
-          />
-          <button type="submit" className="btn btn-outline-success">
-            Search
-          </button>
-        </form>
+    <nav className="navbar">
+      <h1 className="logo">Mando’s Sportsbook</h1>
 
-        {/* Auth Buttons */}
-        <div>
-          <Link to="/signup" className="btn btn-primary me-2">
-            Sign Up
-          </Link>
-          <Link to="/login" className="btn btn-outline-primary">
-            Log In
-          </Link>
-        </div>
+      {/* Search Bar */}
+      <form onSubmit={handleSearch} className="search-form">
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input"
+        />
+        <button type="submit" className="search-btn">Search</button>
+      </form>
+
+      {/* Navigation Buttons */}
+      <div className="nav-links">
+        {!user ? (
+          <>
+            <Link to="/signup" className="nav-btn">Sign Up</Link>
+            <Link to="/login" className="nav-btn">Log In</Link>
+          </>
+        ) : (
+          <button onClick={handleLogout} className="nav-btn">Logout</button>
+        )}
       </div>
     </nav>
   );

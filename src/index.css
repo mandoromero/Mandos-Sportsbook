@@ -8,3 +8,13 @@ body {
   background-color: #f8f9fa;
   color: #212529;
 }
+
+.home {
+  padding: 0 30px;
+}
+
+.title-container {
+  display: flex;
+  margin: 80px 0 50px 0;
+  justify-content: center;
+}

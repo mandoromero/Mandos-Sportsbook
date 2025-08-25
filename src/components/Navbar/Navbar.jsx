@@ -31,7 +31,9 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <h1 className="logo">Mando’s Sportsbook</h1>
+      <h1 className="logo">
+        <Link to="/" className="logo-link">Mando’s Sportsbook</Link>
+      </h1>
 
       {/* Search Bar */}
       <form onSubmit={handleSearch} className="search-form">

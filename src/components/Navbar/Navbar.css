@@ -8,6 +8,10 @@
     margin-left: 50px;
 }
 
+.logo-link {
+    color: white;
+}
+
 .search-form{
     display: flex;
     gap:15px;

@@ -1,16 +1,15 @@
-import rigoImageUrl from "../assets/img/rigo-baby.jpg";
-import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import MLBSchedule from "../components/MLBSchedule/MLBSchedule.jsx";
 
 export const Home = () => {
-
-  const {store, dispatch} =useGlobalReducer()
-
-	return (
-		<div className="text-center mt-5">
-			<h1>Hello Rigo!!</h1>
-			<p>
-				<img src={rigoImageUrl} />
-			</p>
-		</div>
-	);
-}; 
+	
+  	return (
+		<div className="home">
+			<div className="title-container">
+			 	<h1 className="home-title">Welcome to Mando’s Sportsbook</h1>
+			</div>
+			<div className="sports">
+				<MLBSchedule />
+			</div>
+    	</div>
+  	);
+};

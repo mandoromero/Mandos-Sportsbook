@@ -1,9 +1,10 @@
 // components/Navbar.jsx
 import { Link } from "react-router-dom";
 import { useAuth } from"../AuthContext";
-import { auth } from "../../../firebase.js";
+import { auth } from "../../firebase.js";
 import { signOut } from "firebase/auth";
 import { useState } from "react";
+import "../Navbar/Navbar.css";
 
 export default function Navbar() {
   const { user } = useAuth();
@@ -48,8 +49,12 @@ export default function Navbar() {
       <div className="nav-links">
         {!user ? (
           <>
-            <Link to="/signup" className="nav-btn">Sign Up</Link>
-            <Link to="/login" className="nav-btn">Log In</Link>
+            <button className="signup-link-btn">
+              <Link to="/signup" className="nav-btn">Sign Up</Link>
+            </button>
+            <button className="login-link-btn">
+              <Link to="/login" className="nav-btn">Log In</Link>
+            </button>
           </>
         ) : (
           <button onClick={handleLogout} className="nav-btn">Logout</button>

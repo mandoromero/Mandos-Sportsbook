@@ -1,3 +1,29 @@
-.form-control {
-    margin-left: 150px;
+.navbar {
+    background-color: #1d2951;
+    color: white;
+    padding: 20px 0;
+}
+
+.logo {
+    margin-left: 50px;
+}
+
+.search-form{
+    display: flex;
+    gap:15px;
+}
+
+.search-input {
+    font-size: 1.3rem;
+    width: 500px;
+    font-size: 1.3rem;
+    font-weight: 800;
+}
+
+.login-link-btn, .signup-link-btn, .search-btn {
+    padding: 10px 15px;
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin-right: 50px;
+    border-radius: 10px;
 }

@@ -1,24 +1,82 @@
-// Import necessary hooks and functions from React.
-import { useContext, useReducer, createContext } from "react";
-import storeReducer, { initialStore } from "../store"  // Import the reducer and the initial state.
+import { createContext, useContext, useReducer, useEffect } from "react";
+import { initialState, reducer } from "../store";
 
-// Create a context to hold the global state of the application
-// We will call this global state the "store" to avoid confusion while using local states
-const StoreContext = createContext()
+const StoreContext = createContext();
 
-// Define a provider component that encapsulates the store and warps it in a context provider to 
-// broadcast the information throught all the app pages and components.
+const API_KEY = import.meta.env.VITE_ODDS_API_KEY;
+
 export function StoreProvider({ children }) {
-    // Initialize reducer with the initial state.
-    const [store, dispatch] = useReducer(storeReducer, initialStore())
-    // Provide the store and dispatch method to all child components.
-    return <StoreContext.Provider value={{ store, dispatch }}>
-        {children}
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  // Generic fetch function for any sport
+  async function fetchSportData(sportKey, type = "odds") {
+    try {
+      const url = new URL(`https://api.the-odds-api.com/v4/sports/${sportKey}/${type}`);
+      url.search = new URLSearchParams({
+        regions: "us",
+        markets: "h2h",
+        oddsFormat: "american",
+        apiKey: API_KEY,
+        ...(type === "scores" && { daysFrom: 1 }),
+      }).toString();
+
+      const res = await fetch(url.toString());
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.error(`Error fetching ${sportKey} ${type}:`, err);
+      dispatch({ type: "SET_SPORT_ERROR", sport: sportKey, payload: "Failed to load games." });
+      return [];
+    }
+  }
+
+  // Initialize with odds + then poll scores
+  async function loadSport(sportKey) {
+    const odds = await fetchSportData(sportKey, "odds");
+    const today = new Date().toISOString().split("T")[0];
+    const todaysGames = odds.filter((game) =>
+      game.commence_time.startsWith(today)
+    );
+
+    dispatch({ type: "SET_SPORT_GAMES", sport: sportKey, payload: todaysGames });
+
+    async function updateScores() {
+      const scores = await fetchSportData(sportKey, "scores");
+      dispatch({
+        type: "SET_SPORT_GAMES",
+        sport: sportKey,
+        payload: todaysGames.map((g) => {
+          const scoreInfo = scores.find((s) => s.id === g.id);
+          return scoreInfo ? { ...g, ...scoreInfo } : g;
+        }),
+      });
+    }
+
+    updateScores();
+    setInterval(updateScores, 30000); // poll every 30s
+  }
+
+  // Load all sports once
+  useEffect(() => {
+    loadSport("baseball_mlb");
+    loadSport("americanfootball_nfl");
+    loadSport("basketball_nba");
+    loadSport("icehockey_nhl");
+  }, []);
+
+  return (
+    <StoreContext.Provider value={{ state, dispatch }}>
+      {children}
     </StoreContext.Provider>
+  );
 }
 
-// Custom hook to access the global state and dispatch function.
+export function useStore() {
+  return useContext(StoreContext);
+}
+
+
 export default function useGlobalReducer() {
-    const { dispatch, store } = useContext(StoreContext)
-    return { dispatch, store };
+    const { state, dispatch } = useStore();
+    return { state, dispatch };
 }

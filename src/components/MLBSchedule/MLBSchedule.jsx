@@ -1,43 +1,9 @@
-import { useEffect, useState } from "react";
-import "../MLBSchedule/MLBSchedule.css";
-
-const API_KEY = import.meta.env.VITE_ODDS_API_KEY;
+import { useStore } from "../../hooks/useGlobalReducer";
+import "./MLBSchedule.css";
 
 export default function MLBSchedule() {
-  const [games, setGames] = useState([]);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    async function fetchGames() {
-      try {
-        const url = new URL("https://api.the-odds-api.com/v4/sports/baseball_mlb/odds");
-        url.search = new URLSearchParams({
-          regions: "us", // ✅ must be plural
-          markets: "h2h",
-          oddsFormat: "american",
-          apiKey: API_KEY,
-        }).toString();
-
-        const res = await fetch(url.toString());
-        if (!res.ok) throw new Error(`Status ${res.status}`);
-        const data = await res.json();
-
-        // ✅ filter to today’s games
-        const today = new Date().toISOString().split("T")[0];
-        const todaysGames = data.filter((game) =>
-          game.commence_time.startsWith(today)
-        );
-
-        setGames(todaysGames);
-        setError(""); // clear any previous errors
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load today's MLB games.");
-      }
-    }
-
-    fetchGames();
-  }, [API_KEY]);
+  const { state } = useStore();
+  const { games, error } = state.mlb;
 
   return (
     <div className="mlb">
@@ -47,19 +13,15 @@ export default function MLBSchedule() {
       {!error && !games.length && <p>No MLB games scheduled for today.</p>}
 
       {games.map((game) => {
-        const { id, commence_time, home_team, away_team, bookmakers } = game;
-        const h2h = (bookmakers[0]?.markets || []).find((m) => m.key === "h2h");
+        const { id, commence_time, home_team, away_team, bookmakers, scores, completed } = game;
+        const h2h = (bookmakers?.[0]?.markets || []).find((m) => m.key === "h2h");
         const outcomes = h2h?.outcomes || [];
 
+        const homeScore = scores?.find((s) => s.name === home_team)?.score;
+        const awayScore = scores?.find((s) => s.name === away_team)?.score;
+
         return (
-          <div
-            key={id}
-            style={{
-              padding: "10px",
-              borderBottom: "1px solid #ddd",
-              marginBottom: "10px",
-            }}
-          >
+          <div key={id} style={{ padding: "10px", borderBottom: "1px solid #ddd" }}>
             <strong>
               {new Date(commence_time).toLocaleTimeString([], {
                 hour: "2-digit",
@@ -67,6 +29,14 @@ export default function MLBSchedule() {
               })}
             </strong>{" "}
             — {away_team} @ {home_team}
+
+            {scores && (
+              <div style={{ marginTop: "5px", fontWeight: "bold" }}>
+                {away_team}: {awayScore} — {home_team}: {homeScore}
+                {completed ? " (Final)" : " (Live)"}
+              </div>
+            )}
+
             <div style={{ marginTop: "5px" }}>
               {outcomes.map((o) => (
                 <span key={o.name} style={{ marginRight: "15px" }}>

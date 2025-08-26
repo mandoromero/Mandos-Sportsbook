@@ -4,4 +4,7 @@
     outline-offset: 15px;
     width: 20%;
     padding: 10px;
+    min-height: 900px;
+    overflow-y: scroll;
+    text-align: center;
 }

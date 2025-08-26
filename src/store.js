@@ -1,32 +1,27 @@
-export const initialStore=()=>{
-  return{
-    message: null,
-    todos: [
-      {
-        id: 1,
-        title: "Make the bed",
-        background: null,
-      },
-      {
-        id: 2,
-        title: "Do my homework",
-        background: null,
-      }
-    ]
-  }
-}
+// store.js
 
-export default function storeReducer(store, action = {}) {
-  switch(action.type){
-    case 'add_task':
+export const initialState = {
+  mlb: { games: [], error: "" },
+  nfl: { games: [], error: "" },
+  nba: { games: [], error: "" },
+  nhl: { games: [], error: "" },
+};
 
-      const { id,  color } = action.payload
-
+export function reducer(state, action) {
+  switch (action.type) {
+    case "SET_SPORT_GAMES":
       return {
-        ...store,
-        todos: store.todos.map((todo) => (todo.id === id ? { ...todo, background: color } : todo))
+        ...state,
+        [action.sport]: { ...state[action.sport], games: action.payload, error: "" },
       };
+
+    case "SET_SPORT_ERROR":
+      return {
+        ...state,
+        [action.sport]: { ...state[action.sport], error: action.payload },
+      };
+
     default:
-      throw Error('Unknown action.');
-  }    
+      return state;
+  }
 }

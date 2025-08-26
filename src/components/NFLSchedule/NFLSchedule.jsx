@@ -1,18 +1,21 @@
 import { useEffect, useState } from "react";
-import "../MLBSchedule/MLBSchedule.css";
+import "../NFLSchedule/NFLSchedule.css";
 
+const LOADING_TEXT = "Loading preseason NFL schedule...";
 const API_KEY = import.meta.env.VITE_ODDS_API_KEY;
 
-export default function MLBSchedule() {
+export default function NFLSchedule() {
   const [games, setGames] = useState([]);
   const [error, setError] = useState("");
+  const [timeframeTitle, setTimeframeTitle] = useState("");
+  const [dateRange, setDateRange] = useState("");
 
   useEffect(() => {
-    async function fetchGames() {
+    async function fetchPreseason() {
       try {
-        const url = new URL("https://api.the-odds-api.com/v4/sports/baseball_mlb/odds");
+        const url = new URL("https://api.the-odds-api.com/v4/sports/americanfootball_nfl_preseason/odds");
         url.search = new URLSearchParams({
-          regions: "us", // ✅ must be plural
+          regions: "us",
           markets: "h2h",
           oddsFormat: "american",
           apiKey: API_KEY,
@@ -22,29 +25,33 @@ export default function MLBSchedule() {
         if (!res.ok) throw new Error(`Status ${res.status}`);
         const data = await res.json();
 
-        // ✅ filter to today’s games
-        const today = new Date().toISOString().split("T")[0];
-        const todaysGames = data.filter((game) =>
-          game.commence_time.startsWith(today)
-        );
+        // The API returns games; here, we assume they are all Week 3 preseason.
+        // Hardcode headers accordingly.
+        setTimeframeTitle("PRESEASON WEEK 3");
 
-        setGames(todaysGames);
-        setError(""); // clear any previous errors
+        const today = new Date();
+        const startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6); // assume 1-week preseason period
+        setDateRange(`${startDate.toLocaleDateString()} – ${endDate.toLocaleDateString()}`);
+
+        setGames(data);
       } catch (err) {
         console.error(err);
-        setError("Failed to load today's MLB games.");
+        setError("Failed to load NFL preseason games.");
       }
     }
 
-    fetchGames();
-  }, [API_KEY]);
+    fetchPreseason();
+  }, []);
 
   return (
-    <div className="mlb">
-      <h2>Today's MLB Games</h2>
+    <div className="nfl">
+      <h2>{timeframeTitle}</h2>
+      {dateRange && <p>{dateRange}</p>}
 
       {error && <p style={{ color: "red" }}>{error}</p>}
-      {!error && !games.length && <p>No MLB games scheduled for today.</p>}
+      {!error && !games.length && <p>{LOADING_TEXT}</p>}
 
       {games.map((game) => {
         const { id, commence_time, home_team, away_team, bookmakers } = game;

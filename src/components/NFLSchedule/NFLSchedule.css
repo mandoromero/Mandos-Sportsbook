@@ -1,0 +1,7 @@
+.nfl {
+    border: 2px black solid;
+    outline: 5px black solid;
+    outline-offset: 15px;
+    width: 20%;
+    padding: 10px;
+}

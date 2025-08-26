@@ -1,10 +1,6 @@
 // store.js
-
 export const initialState = {
-  mlb: { games: [], error: "" },
-  nfl: { games: [], error: "" },
-  nba: { games: [], error: "" },
-  nhl: { games: [], error: "" },
+  MLB: { games: [], error: null },
 };
 
 export function reducer(state, action) {
@@ -12,15 +8,13 @@ export function reducer(state, action) {
     case "SET_SPORT_GAMES":
       return {
         ...state,
-        [action.sport]: { ...state[action.sport], games: action.payload, error: "" },
+        [action.sport]: { ...state[action.sport], games: action.payload },
       };
-
     case "SET_SPORT_ERROR":
       return {
         ...state,
         [action.sport]: { ...state[action.sport], error: action.payload },
       };
-
     default:
       return state;
   }

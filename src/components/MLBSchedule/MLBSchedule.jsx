@@ -13,37 +13,46 @@ export default function MLBSchedule() {
       {!error && !games.length && <p>No MLB games scheduled for today.</p>}
 
       {games.map((game) => {
-        const { id, commence_time, home_team, away_team, bookmakers, scores, completed } = game;
-        const h2h = (bookmakers?.[0]?.markets || []).find((m) => m.key === "h2h");
-        const outcomes = h2h?.outcomes || [];
-
-        const homeScore = scores?.find((s) => s.name === home_team)?.score;
-        const awayScore = scores?.find((s) => s.name === away_team)?.score;
+        const {
+          gameID,
+          startTime,
+          homeTeam,
+          awayTeam,
+          completed,
+          score,
+          odds,
+        } = game;
 
         return (
-          <div key={id} style={{ padding: "10px", borderBottom: "1px solid #ddd" }}>
+          <div
+            key={gameID}
+            style={{ padding: "10px", borderBottom: "1px solid #ddd" }}
+          >
             <strong>
-              {new Date(commence_time).toLocaleTimeString([], {
+              {new Date(startTime).toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
               })}
             </strong>{" "}
-            — {away_team} @ {home_team}
+            — {awayTeam} @ {homeTeam}
 
-            {scores && (
+            {score && (
               <div style={{ marginTop: "5px", fontWeight: "bold" }}>
-                {away_team}: {awayScore} — {home_team}: {homeScore}
+                {awayTeam}: {score.away} — {homeTeam}: {score.home}
                 {completed ? " (Final)" : " (Live)"}
               </div>
             )}
 
-            <div style={{ marginTop: "5px" }}>
-              {outcomes.map((o) => (
-                <span key={o.name} style={{ marginRight: "15px" }}>
-                  {o.name}: {o.price > 0 ? `+${o.price}` : o.price}
+            {odds && (
+              <div style={{ marginTop: "5px" }}>
+                <span style={{ marginRight: "15px" }}>
+                  {awayTeam}: {odds.away > 0 ? `+${odds.away}` : odds.away}
                 </span>
-              ))}
-            </div>
+                <span>
+                  {homeTeam}: {odds.home > 0 ? `+${odds.home}` : odds.home}
+                </span>
+              </div>
+            )}
           </div>
         );
       })}

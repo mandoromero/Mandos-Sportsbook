@@ -3,7 +3,7 @@ import { createContext, useContext, useReducer, useEffect } from "react";
 import { initialState, reducer } from "../store";
 
 const StoreContext = createContext();
-const API_KEY = import.meta.env.VITE_SPORTS_GAME_ODDS_KEY; // 👈 Add this in your .env
+const API_KEY = import.meta.env.VITE_SPORTS_GAME_ODDS_KEY; // 👈 from .env
 
 export function StoreProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -24,12 +24,12 @@ export function StoreProvider({ children }) {
       });
 
       if (!res.ok) throw new Error(`Status ${res.status}`);
-      return await res.json(); // array of games
+      return await res.json(); // returns array of events
     } catch (err) {
       console.error(`Error fetching ${leagueID}:`, err);
       dispatch({
         type: "SET_SPORT_ERROR",
-        sport: leagueID,
+        sport: leagueID.toLowerCase(), // normalize leagueID
         payload: "Failed to load games.",
       });
       return [];
@@ -38,7 +38,11 @@ export function StoreProvider({ children }) {
 
   async function loadSport(leagueID) {
     const events = await fetchSportData(leagueID);
-    dispatch({ type: "SET_SPORT_GAMES", sport: leagueID, payload: events });
+    dispatch({
+      type: "SET_SPORT_GAMES",
+      sport: leagueID.toLowerCase(), // normalize to "mlb"
+      payload: events,
+    });
   }
 
   useEffect(() => {

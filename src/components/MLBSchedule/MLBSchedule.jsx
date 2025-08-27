@@ -1,61 +1,53 @@
-import { useStore } from "../../hooks/useGlobalReducer";
-import "./MLBSchedule.css";
+// src/components/MLBTeams/MLBTeams.jsx
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import "../MLBSchedule/MLBSchedule.css";
 
-export default function MLBSchedule() {
-  const { state } = useStore();
-  const { games, error } = state.mlb;
+const MLBTeams = () => {
+  const [teams, setTeams] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTeams = async () => {
+      try {
+        const response = await axios.get("https://api.sportsgameodds.com/v2/teams", {
+          params: { leagueID: "MLB" },
+          headers: {
+            "x-api-key": import.meta.env.VITE_SPORTS_API_KEY, // Make sure you set this in .env
+          },
+        });
+
+        if (response.data.success) {
+          setTeams(response.data.data);
+        } else {
+          setError("Failed to fetch teams");
+        }
+      } catch (err) {
+        setError(err.message || "Error fetching teams");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTeams();
+  }, []);
+
+  if (loading) return <p>Loading MLB Teams...</p>;
+  if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
 
   return (
     <div className="mlb">
-      <h2>Today's MLB Games</h2>
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {!error && !games.length && <p>No MLB games scheduled for today.</p>}
-
-      {games.map((game) => {
-        const {
-          gameID,
-          startTime,
-          homeTeam,
-          awayTeam,
-          completed,
-          score,
-          odds,
-        } = game;
-
-        return (
-          <div
-            key={gameID}
-            style={{ padding: "10px", borderBottom: "1px solid #ddd" }}
-          >
-            <strong>
-              {new Date(startTime).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </strong>{" "}
-            — {awayTeam} @ {homeTeam}
-
-            {score && (
-              <div style={{ marginTop: "5px", fontWeight: "bold" }}>
-                {awayTeam}: {score.away} — {homeTeam}: {score.home}
-                {completed ? " (Final)" : " (Live)"}
-              </div>
-            )}
-
-            {odds && (
-              <div style={{ marginTop: "5px" }}>
-                <span style={{ marginRight: "15px" }}>
-                  {awayTeam}: {odds.away > 0 ? `+${odds.away}` : odds.away}
-                </span>
-                <span>
-                  {homeTeam}: {odds.home > 0 ? `+${odds.home}` : odds.home}
-                </span>
-              </div>
-            )}
-          </div>
-        );
-      })}
+      <h2>MLB Teams</h2>
+      <ul>
+        {teams.map((team) => (
+          <li key={team.teamID}>
+            <strong>{team.names.long}</strong> ({team.names.short}) - {team.leagueID}
+          </li>
+        ))}
+      </ul>
     </div>
   );
-}
+};
+
+export default MLBTeams;

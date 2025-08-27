@@ -1,6 +1,10 @@
 // store.js
 export const initialState = {
-  MLB: { games: [], error: null },
+  user: null,
+  mlb: {
+    games: [],
+    error: null,
+  },
 };
 
 export function reducer(state, action) {

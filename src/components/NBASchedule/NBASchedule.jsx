@@ -1,8 +1,7 @@
-
 import { useEffect, useState } from "react";
 import "./NBASchedule.css";
 
-const API_KEY = import.meta.env.VITE_ODDS_API_KEY;
+const API_KEY = import.meta.env.VITE_SPORTS_GAME_ODDS_KEY;
 const LOADING_TEXT = "Loading NBA preseason schedule...";
 
 export default function NBASchedule() {
@@ -12,15 +11,16 @@ export default function NBASchedule() {
   useEffect(() => {
     async function fetchGames() {
       try {
-        const url = new URL("https://api.the-odds-api.com/v4/sports/basketball_nba_preseason/odds");
+        const url = new URL("https://api.sportsgameodds.com/v1/events");
         url.search = new URLSearchParams({
-          regions: "us",
-          markets: "h2h",
-          oddsFormat: "american",
-          apiKey: API_KEY,
+          leagueID: "NBA-PRESEASON", // MLB identifier in SportsGameOdds
+          oddsAvailable: true,
         }).toString();
 
-        const res = await fetch(url.toString());
+        const res = await fetch(url.toString(), {
+          headers: { "x-api-key": API_KEY },
+        });
+
         if (!res.ok) throw new Error(`Status ${res.status}`);
         const data = await res.json();
         setGames(data || []);
@@ -42,24 +42,20 @@ export default function NBASchedule() {
       {!error && !games.length && <p>{LOADING_TEXT}</p>}
 
       {games.map((game) => {
-        const { id, commence_time, home_team, away_team, bookmakers } = game;
-        const h2hMarket = (bookmakers[0]?.markets || []).find((m) => m.key === "h2h");
-        const outcomes = h2hMarket?.outcomes || [];
+        const { gameID, startTime, homeTeam, awayTeam, odds } = game;
 
         return (
-          <div key={id} className="nba-game">
+          <div key={gameID} className="nba-game">
             <strong>
-              {new Date(commence_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-            </strong>
-            {" — "}
-            {away_team} @ {home_team}
-            <div className="odds-line">
-              {outcomes.map((o) => (
-                <span key={o.name}>
-                  {o.name}: {o.price > 0 ? `+${o.price}` : o.price}
-                </span>
-              ))}
-            </div>
+              {new Date(startTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </strong>{" "}
+            {awayTeam} @ {homeTeam}
+            {odds && (
+              <div className="odds-line">
+                <span>{awayTeam}: {odds.away > 0 ? `+${odds.away}` : odds.away}</span>
+                <span>{homeTeam}: {odds.home > 0 ? `+${odds.home}` : odds.home}</span>
+              </div>
+            )}
           </div>
         );
       })}

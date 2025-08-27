@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./NHLSchedule.css";
 
-const API_KEY = import.meta.env.VITE_ODDS_API_KEY;
+const API_KEY = import.meta.env.VITE_SPORTS_GAME_ODDS_KEY; // Your SportsGameOdds key
 const LOADING_TEXT = "Loading NHL preseason schedule...";
 
 export default function NHLSchedule() {
@@ -11,15 +11,16 @@ export default function NHLSchedule() {
   useEffect(() => {
     async function fetchGames() {
       try {
-        const url = new URL("https://api.the-odds-api.com/v4/sports/icehockey_nhl_preseason/odds");
+        const url = new URL("https://api.sportsgameodds.com/v1/events");
         url.search = new URLSearchParams({
-          regions: "us",
-          markets: "h2h",
-          oddsFormat: "american",
-          apiKey: API_KEY,
+          oddsAvailable: true,
+          leagueID: "NHL-PRESEASON", // Use the NHL preseason league ID
         }).toString();
 
-        const res = await fetch(url.toString());
+        const res = await fetch(url.toString(), {
+          headers: { "x-api-key": API_KEY },
+        });
+
         if (!res.ok) throw new Error(`Status ${res.status}`);
         const data = await res.json();
         setGames(data || []);
@@ -41,23 +42,28 @@ export default function NHLSchedule() {
       {!error && !games.length && <p>{LOADING_TEXT}</p>}
 
       {games.map((game) => {
-        const { id, commence_time, home_team, away_team, bookmakers } = game;
-        const h2hMarket = (bookmakers[0]?.markets || []).find((m) => m.key === "h2h");
-        const outcomes = h2hMarket?.outcomes || [];
+        const { gameID, startTime, homeTeam, awayTeam, odds, score, completed } = game;
 
         return (
-          <div key={id} className="nhl-game">
+          <div key={gameID} className="nhl-game">
             <strong>
-              {new Date(commence_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              {new Date(startTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
             </strong>{" "}
-            — {away_team} @ {home_team}
-            <div className="odds-line">
-              {outcomes.map((o) => (
-                <span key={o.name}>
-                  {o.name}: {o.price > 0 ? `+${o.price}` : o.price}
-                </span>
-              ))}
-            </div>
+            — {awayTeam} @ {homeTeam}
+
+            {score && (
+              <div style={{ marginTop: "5px", fontWeight: "bold" }}>
+                {awayTeam}: {score.away} — {homeTeam}: {score.home}
+                {completed ? " (Final)" : " (Live)"}
+              </div>
+            )}
+
+            {odds && (
+              <div className="odds-line">
+                <span>{awayTeam}: {odds.away > 0 ? `+${odds.away}` : odds.away}</span>
+                <span>{homeTeam}: {odds.home > 0 ? `+${odds.home}` : odds.home}</span>
+              </div>
+            )}
           </div>
         );
       })}

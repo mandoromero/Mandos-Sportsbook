@@ -1,7 +1,7 @@
 // src/components/MLBTeams/MLBTeams.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "../MLBSchedule/MLBSchedule.css";
+import "./MLBSchedule.css";;
 
 const MLBTeams = () => {
   const [teams, setTeams] = useState([]);

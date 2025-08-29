@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../../firebase.js";
+import { auth, db } from "../../firebase.js";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { useStore } from "../../hooks/useGlobalReducer.jsx"; // 👈 import global store
 import "../SignUp/SignUp.css";
-import { db } from "../../firebase.js";
-import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 
 export default function SignUp() {
   const navigate = useNavigate();
+  const { dispatch } = useStore(); // 👈 get dispatch from global state
 
   const [form, setForm] = useState({
     firstName: "",
@@ -15,7 +16,6 @@ export default function SignUp() {
     email: "",
     password: "",
     confirmPassword: "",
-    userName: "",
     month: "1",
     day: "1",
     year: "2000",
@@ -39,20 +39,19 @@ export default function SignUp() {
       return;
     }
 
+    // ✅ Strong password validation
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (!passwordRegex.test(form.password)) {
+      alert(
+        "Password must be at least 8 characters long, include one uppercase letter, one lowercase letter, one number, and one special character."
+      );
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Normalize username (lowercase + trim)
-      const username = form.userName.trim().toLowerCase();
-
-      // 🔎 Check if username is already taken
-      const q = query(collection(db, "users"), where("userName", "==", username));
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        alert("Username already taken, please choose another.");
-        setLoading(false);
-        return;
-      }
-
       // ✅ Create Firebase Auth user
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -68,15 +67,26 @@ export default function SignUp() {
       await setDoc(doc(db, "users", user.uid), {
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
-        userName: username,
         email: form.email.trim(),
         birthDate: birthDate,
         createdAt: new Date(),
       });
 
+      // ✅ Save to global state for profile use
+      dispatch({
+        type: "SET_USER",
+        payload: {
+          uid: user.uid,
+          email: user.email,
+          firstName: form.firstName.trim(),
+          lastName: form.lastName.trim(),
+          birthDate,
+        },
+      });
+
       console.log("User signed up:", user.uid);
       alert("Account created successfully!");
-      navigate("/login"); // 🔀 Redirect after success
+      navigate("/"); // 🔀 redirect to  page after signup
     } catch (error) {
       console.error("Signup error:", error.message);
 
@@ -86,7 +96,8 @@ export default function SignUp() {
           message = "This email is already in use.";
           break;
         case "auth/weak-password":
-          message = "Password should be at least 6 characters.";
+          message =
+            "Password should be at least 6 characters (our rules require 8+ with symbols).";
           break;
         case "auth/invalid-email":
           message = "Please enter a valid email address.";
@@ -185,18 +196,6 @@ export default function SignUp() {
               </select>
             </div>
           </div>
-        </div>
-
-        <div className="signup-form">
-          <label htmlFor="userName">Create Username</label>
-          <input
-            id="userName"
-            type="text"
-            name="userName"
-            value={form.userName}
-            onChange={handleChange}
-            required
-          />
         </div>
 
         <div className="signup-form">

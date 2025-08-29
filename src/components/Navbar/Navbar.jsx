@@ -51,6 +51,9 @@ export default function Navbar() {
       <div className="nav-links">
         {!user ? (
           <>
+            <button className="profile-link-btn">
+              <Link to="/profile" className="nav-btn">Profile</Link>
+            </button>
             <button className="signup-link-btn">
               <Link to="/signup" className="nav-btn">Sign Up</Link>
             </button>

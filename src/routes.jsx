@@ -7,6 +7,7 @@ import LogIn from "./pages/LogIn/LogIn";
 import SignUp from "./pages/SignUp/SignUp";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
+import Profile from "./pages/Profile/Profile.jsx"
 
 export const router = createBrowserRouter([
   {
@@ -17,6 +18,7 @@ export const router = createBrowserRouter([
       { path: "login", element: <LogIn /> },
       { path: "signup", element: <SignUp /> },
       { path: "forgot-password", element: <ForgotPassword /> },
+      { path: "profile", element: <Profile /> },
 
       // Protected routes
       {

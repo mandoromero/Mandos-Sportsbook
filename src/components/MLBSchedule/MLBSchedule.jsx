@@ -1,53 +1,61 @@
-// src/components/MLBTeams/MLBTeams.jsx
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import "./MLBSchedule.css";;
+// src/components/MLB/MLBSchedule.jsx
+import { useEffect, useState } from "react";
+import "./MLBSchedule.css";
 
-const MLBTeams = () => {
-  const [teams, setTeams] = useState([]);
+export default function MLBSchedule() {
+  const [games, setGames] = useState([]);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTeams = async () => {
+    const fetchMLBGames = async () => {
       try {
-        const response = await axios.get("https://api.sportsgameodds.com/v2/teams", {
-          params: { leagueID: "MLB" },
-          headers: {
-            "x-api-key": import.meta.env.VITE_SPORTS_API_KEY, // Make sure you set this in .env
-          },
-        });
+        // ✅ call your backend instead of RapidAPI directly
+        const res = await fetch("http://localhost:5000/api/mlb");
 
-        if (response.data.success) {
-          setTeams(response.data.data);
-        } else {
-          setError("Failed to fetch teams");
-        }
+        if (!res.ok) throw new Error(`Status ${res.status}`);
+        const data = await res.json();
+
+        setGames(data.advantages || []);
+        setError(null);
       } catch (err) {
-        setError(err.message || "Error fetching teams");
-      } finally {
-        setLoading(false);
+        console.error("Error fetching MLB games:", err);
+        setError("Failed to load MLB games.");
       }
     };
 
-    fetchTeams();
+    fetchMLBGames();
   }, []);
-
-  if (loading) return <p>Loading MLB Teams...</p>;
-  if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
 
   return (
     <div className="mlb">
-      <h2>MLB Teams</h2>
-      <ul>
-        {teams.map((team) => (
-          <li key={team.teamID}>
-            <strong>{team.names.long}</strong> ({team.names.short}) - {team.leagueID}
-          </li>
-        ))}
-      </ul>
+      <h2>MLB Schedule</h2>
+
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      {!error && !games.length && <p>Loading MLB games...</p>}
+
+      {games.map((adv, idx) => {
+        const event = adv.market?.event;
+        const outcomes = adv.outcomes || [];
+
+        return (
+          <div key={idx} className="mlb-game">
+            <strong>{event?.name || "Unknown Event"}</strong>
+            <div>
+              Start:{" "}
+              {event?.startTime
+                ? new Date(event.startTime).toLocaleString()
+                : "TBD"}
+            </div>
+            <div>
+              {outcomes.map((o, i) => (
+                <span key={i} style={{ marginRight: "15px" }}>
+                  {o.participant?.name || "Team"} — {o.payout || 0}
+                </span>
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
-};
-
-export default MLBTeams;
+}

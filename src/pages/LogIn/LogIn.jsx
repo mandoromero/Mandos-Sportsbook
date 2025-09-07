@@ -24,7 +24,6 @@ export default function LogIn() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("Logged in user:", userCredential.user);
 
-      // Redirect to home (or previous page if available)
       const redirectTo = location.state?.from || "/";
       navigate(redirectTo, { replace: true });
     } catch (err) {
@@ -54,7 +53,6 @@ export default function LogIn() {
     <div className="log-in-container">
       <h2 className="sub-title">Log In</h2>
 
-      {/* Show success message if redirected from reset */}
       {location.state?.fromReset && (
         <p className="success-message">
           Password reset link sent! Please check your email.

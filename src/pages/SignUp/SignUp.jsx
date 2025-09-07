@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, db } from "../../firebase.js";
+import { auth } from "../../firebase.js";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-import { useStore } from "../../hooks/useGlobalReducer.jsx"; // 👈 import global store
+import { useStore } from "../../hooks/useGlobalReducer.jsx"; 
+import { writeUserData } from "../../data/user.js"
 import "../SignUp/SignUp.css";
 
 export default function SignUp() {
@@ -60,19 +60,19 @@ export default function SignUp() {
       );
       const user = userCredential.user;
 
-      // Format birthdate string
       const birthDate = `${form.year}-${form.month}-${form.day}`;
 
       // ✅ Save extra info to Firestore
-      await setDoc(doc(db, "users", user.uid), {
-        firstName: form.firstName.trim(),
-        lastName: form.lastName.trim(),
-        email: form.email.trim(),
-        birthDate: birthDate,
-        createdAt: new Date(),
-      });
-
-      // ✅ Save to global state for profile use
+      await writeUserData(
+        user.uid,
+        form.firstName.trim(),
+        form.lastName.trim(),
+        form.email.trim(form.email),
+        parseInt(form.month),
+        parseInt(form.day),
+        parseInt(form.year)
+      );
+    
       dispatch({
         type: "SET_USER",
         payload: {
@@ -80,9 +80,9 @@ export default function SignUp() {
           email: user.email,
           firstName: form.firstName.trim(),
           lastName: form.lastName.trim(),
-          birthDate,
-        },
-      });
+          birthDate: `${form.year}-${form.month}-${form.day}`,
+        }
+      })
 
       console.log("User signed up:", user.uid);
       alert("Account created successfully!");
@@ -97,7 +97,7 @@ export default function SignUp() {
           break;
         case "auth/weak-password":
           message =
-            "Password should be at least 6 characters (our rules require 8+ with symbols).";
+            "Password should be at least 8 characters (our rules require 8+ with symbols).";
           break;
         case "auth/invalid-email":
           message = "Please enter a valid email address.";

@@ -68,7 +68,7 @@ export default function ForgotPassword() {
           value={email}
           onChange={(e) => {
             setEmail(e.target.value);
-            setError(""); // clear error when typing
+            setError("");
           }}
           required
         />

@@ -3,10 +3,12 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage"; 
+import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBZG4B9-T3JU8J7MExlVyNDgHkkp9Vn-CI",
   authDomain: "mandos-sportsbook.firebaseapp.com",
+  databaseURL: "https: //mandos-sportsbook-default-rtdb.firebase10.com",
   projectId: "mandos-sportsbook",
   storageBucket: "mandos-sportsbook.appspot.com",
   messagingSenderId: "680494738589",
@@ -20,5 +22,6 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+export const database =- getDatabase(app)
 
 export default app;
